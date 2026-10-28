@@ -1,6 +1,6 @@
 // Server-only computer opponent. It submits ordinary direction/brake inputs;
 // shared physics, checkpoints, pickups and finish rules remain the referee.
-const route=[[175,185],[820,185],[820,510],[180,510],[180,185],[320,185],[820,185],[820,510],[180,510],[180,185],[320,185]];
+const route=[[175,185],[1030,185],[1030,610],[180,610],[180,185],[320,185],[1030,185],[1030,610],[180,610],[180,185],[320,185]];
 export function computerInput(p){
  const driver=p.computerDriver??(p.computerDriver={index:0});
  let target=route[Math.min(driver.index,route.length-1)],dx=target[0]-p.x,dy=target[1]-p.y,distance=Math.hypot(dx,dy);

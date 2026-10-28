@@ -1,15 +1,15 @@
 // Shared geometry and deterministic motion. Only the server awards progress/finishes.
-export const TRACK={width:1000,height:700,radius:12,laps:2,maxSpeed:210,acceleration:500,coast:360,braking:1050,turnRate:9,
- outer:{x:50,y:60,w:900,h:580},inner:{x:275,y:235,w:450,h:230},
- obstacles:[{x:480,y:60,w:42,h:95},{x:575,y:550,w:42,h:90},{x:50,y:350,w:100,h:36},{x:850,y:315,w:100,h:36}],
- gates:[{axis:'x',line:800,direction:1,min:60,max:235,label:'NORTH STRAIGHT',target:{x:830,y:160}},{axis:'y',line:500,direction:1,min:725,max:950,label:'EAST TURN',target:{x:830,y:540}},{axis:'x',line:200,direction:-1,min:465,max:640,label:'SOUTH CHICANE',target:{x:170,y:540}},{axis:'y',line:200,direction:-1,min:50,max:275,label:'HOME BEND',target:{x:170,y:160}}],
- finish:{axis:'x',line:240,direction:1,min:60,max:235,target:{x:240,y:160}}};
+export const TRACK={width:1200,height:800,radius:12,laps:2,maxSpeed:210,acceleration:500,coast:360,braking:1050,turnRate:9,
+ outer:{x:50,y:60,w:1100,h:680},inner:{x:345,y:285,w:510,h:230},
+ obstacles:[{x:480,y:60,w:42,h:95},{x:675,y:650,w:42,h:90},{x:50,y:350,w:100,h:36},{x:1050,y:415,w:100,h:36}],
+ gates:[{axis:'x',line:1000,direction:1,min:60,max:285,label:'NORTH STRAIGHT',target:{x:1030,y:185}},{axis:'y',line:600,direction:1,min:855,max:1150,label:'EAST TURN',target:{x:1030,y:640}},{axis:'x',line:200,direction:-1,min:515,max:740,label:'SOUTH CHICANE',target:{x:180,y:640}},{axis:'y',line:200,direction:-1,min:50,max:345,label:'HOME BEND',target:{x:180,y:185}}],
+ finish:{axis:'x',line:240,direction:1,min:60,max:285,target:{x:240,y:160}}};
 export const TACTICS={initialCharges:2,maxCharges:3,cooldown:3000,recovery:1200,
  abilities:{
   gate:{name:'Gate Slam',zone:{x:640,y:60,w:24,h:95},warning:1200,duration:2200},
-  belt:{name:'Belt Flip',zone:{x:340,y:485,w:160,h:65},warning:1000,duration:3000},
-  oil:{name:'Oil Slick',zone:{x:780,y:365,w:58,h:90},warning:1000,duration:3200}
- },pickups:[{id:'north',x:380,y:185},{id:'east',x:830,y:520},{id:'west',x:180,y:300}]};
+  belt:{name:'Belt Flip',zone:{x:440,y:585,w:160,h:65},warning:1000,duration:3000},
+  oil:{name:'Oil Slick',zone:{x:980,y:465,w:58,h:90},warning:1000,duration:3200}
+ },pickups:[{id:'north',x:380,y:185},{id:'east',x:1030,y:620},{id:'west',x:180,y:300}]};
 export function resetTactics(room){room.hazards={};room.pickups=TACTICS.pickups.map(p=>({id:p.id,claimedBy:null}));room.tacticSerial=0;room.tacticEvents=[];}
 export function isActive(room,kind,now){const h=room?.hazards?.[kind];return room?.phase==='racing'&&!!h&&now>=h.activeAt&&now<h.endsAt;}
 export function hazardStatus(p,room,now){
