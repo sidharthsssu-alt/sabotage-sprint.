@@ -27,17 +27,17 @@ test('solo is explicitly labeled, private to one human, and cannot insert comput
 });
 test('one real client and a computer finish a fair complete race with sabotage and reset for rematch',async t=>{
  const f=await setup(t);await emit(f.human,'start',{});f.setClock(f.room.raceAt);await wait(15);let seq=0;const driver={index:0},seen=new Set();
- for(let i=0;i<5000&&f.room.phase==='racing';i++){
+ for(let i=0;i<11000&&f.room.phase==='racing';i++){
   f.advance(20);
-  for(const [at,kind] of [[0,'gate'],[155,'oil'],[340,'belt']])if(i===at)assert.ok((await emit(f.human,'sabotage',{kind,raceId:f.room.raceId,requestId:'solo-'+kind})).ok);
+  for(const [at,kind] of [[0,'shot'],[155,'boost'],[340,'bomb']])if(i===at)assert.ok((await emit(f.human,'sabotage',{kind,raceId:f.room.raceId,requestId:'solo-'+kind})).ok);
   const p=f.latest.state?.players.find(p=>p.id===f.seat.id);
   if(p&&p.finishMs===null)f.human.emit('input',{...drive(p,driver),raceId:f.room.raceId,seq:++seq});
-  await wait(5);for(const kind of Object.keys(f.room.hazards))seen.add(kind);
-  for(const p of f.room.players.values()){assert.ok(validPosition(p.x,p.y));assert.ok(p.speed<=210);assert.ok(p.charges>=0&&p.charges<=3);}
+  await wait(5);for(const h of Object.values(f.room.hazards))seen.add(h.kind);
+  for(const p of f.room.players.values()){assert.ok(validPosition(p.x,p.y));assert.ok(p.speed<=390);assert.ok(p.charges>=0&&p.charges<=5);}
  }
  assert.equal(f.room.phase,'results');const human=f.room.players.get(f.seat.id);assert.ok(human.finishMs!==null&&f.bot.finishMs!==null);assert.equal(human.lap,2);assert.equal(f.bot.lap,2);assert.equal(human.finishPlace,1,'practice opponent is beatable with legal inputs');assert.equal(f.bot.finishPlace,2);assert.equal(seen.size,3);assert.ok(f.bot.actions.length>0,'CPU uses authority-validated sabotage');assert.ok(f.room.pickups.some(p=>p.claimedBy!==null));
  console.log('Solo finish times:',JSON.stringify({human:human.finishMs,cpu:f.bot.finishMs,cpuActions:f.bot.actions.length}));
- await emit(f.human,'lobby',{});assert.ok((await emit(f.human,'start',{})).ok);assert.equal(f.room.players.size,2);assert.equal(f.bot.computerDriver.index,0);assert.equal(f.bot.actions.length,0);assert.equal(f.bot.charges,2);assert.ok(f.room.pickups.every(p=>p.claimedBy===null));
+ await emit(f.human,'lobby',{});assert.ok((await emit(f.human,'start',{})).ok);assert.equal(f.room.players.size,2);assert.equal(f.bot.computerDriver.index,0);assert.equal(f.bot.actions.length,0);assert.equal(f.bot.charges,3);assert.ok(f.room.pickups.every(p=>p.claimedBy===null));
 });
 test('solo reconnect restores the same human and CPU, never promotes CPU, and expires abandoned rooms',async t=>{
  const f=await setup(t);await emit(f.human,'start',{});f.setClock(f.room.raceAt);await wait(15);const botId=f.bot.id;f.human.disconnect();await wait(15);assert.equal(f.room.host,null);assert.equal(f.room.phase,'racing');f.advance(600);

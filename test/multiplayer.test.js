@@ -20,7 +20,7 @@ test('two players share server countdown; host authority, movement lock, isolati
  const p=room.players.get(a.id),x=p.x;host.emit('input',{x:1000,y:0,brake:false,raceId:room.raceId,seq:1});await wait(60);assert.equal(p.x,x);
  f.setClock(room.raceAt);await wait(60);assert.equal(room.phase,'racing');
  for(let i=0;i<5;i++){f.advance(50);host.emit('input',{x:1000,y:0,brake:false,raceId:room.raceId,seq:i+2,position:9999});await wait(55);}
- assert.ok(p.x>x&&p.x-x<=50,'speed capped by server');
+ assert.ok(p.x>x&&p.x-x<=60,'speed capped by server');
  f.advance(500);await wait(60);const stopped=p.x;f.advance(500);await wait(60);assert.ok(p.x-stopped<30);
  assert.equal(f.game.rooms.get(c.code).phase,'lobby');assert.match((await emit(guest,'lobby',{})).error,/host/);
  assert.match((await emit(host,'lobby',{})).error,/finish/);f.setClock(room.endAt+1);await wait(25);assert.ok((await emit(host,'lobby',{})).ok);assert.equal(room.phase,'lobby');assert.equal(room.raceAt,0);
@@ -48,10 +48,10 @@ test('two independent network clients drive two full laps and agree on final ord
  const f=await setup(t),a=await f.connect(),b=await f.connect();const sa=await emit(a,'enter',{create:true,name:'Alice'}),sb=await emit(b,'enter',{code:sa.code,name:'Ben'}),room=f.game.rooms.get(sa.code);
  const latest=new Map();a.on('state',s=>latest.set('a',s));b.on('state',s=>latest.set('b',s));await emit(a,'start',{});f.setClock(room.raceAt);await wait(20);
  const drivers=[{index:0},{index:0}],seqs=[0,0];
- for(let i=0;i<5000&&room.phase==='racing';i++){
+ for(let i=0;i<11000&&room.phase==='racing';i++){
   f.advance(20);
-  if(i===0){assert.ok((await emit(a,'sabotage',{kind:'gate',raceId:room.raceId,requestId:'race-gate'})).ok);assert.ok((await emit(b,'sabotage',{kind:'belt',raceId:room.raceId,requestId:'race-belt'})).ok);}
-  if(i===155)assert.ok((await emit(a,'sabotage',{kind:'oil',raceId:room.raceId,requestId:'race-oil'})).ok);
+  if(i===0){assert.ok((await emit(a,'sabotage',{kind:'shot',raceId:room.raceId,requestId:'race-gate'})).ok);assert.ok((await emit(b,'sabotage',{kind:'bomb',raceId:room.raceId,requestId:'race-belt'})).ok);}
+  if(i===155)assert.ok((await emit(a,'sabotage',{kind:'boost',raceId:room.raceId,requestId:'race-oil'})).ok);
   for(const [j,s] of [a,b].entries()){
    const snap=latest.get(j?'b':'a'),p=snap?.players.find(p=>p.id===(j?sb.id:sa.id));if(!p||p.finishMs!==null)continue;
    const input=drive(p,drivers[j]);s.emit('input',{...input,seq:++seqs[j],raceId:room.raceId});

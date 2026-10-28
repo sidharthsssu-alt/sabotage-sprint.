@@ -19,13 +19,13 @@ try{
  const guest=await emit(sockets[1],'enter',{code:host.code,name:'Release QA B'});assert.ok(guest.ok);
  assert.match((await emit(sockets[1],'start',{})).error,/host/);
  assert.ok((await emit(sockets[0],'start',{})).ok);
- const drivers=[{index:0},{index:0}],ids=[host.id,guest.id],seq=[0,0],fired=new Set(),deadline=Date.now()+140000;
+ const drivers=[{index:0},{index:0}],ids=[host.id,guest.id],seq=[0,0],fired=new Set(),deadline=Date.now()+260000;
  while(Date.now()<deadline){
   const state=latest[0];
   if(state?.phase==='results')break;
   if(state?.phase==='racing'){
    const elapsed=state.time-state.raceAt;
-   for(const [after,index,kind] of [[0,0,'gate'],[0,1,'belt'],[3200,0,'oil']])if(elapsed>=after&&!fired.has(kind)){
+   for(const [after,index,kind] of [[0,0,'shot'],[0,1,'bomb'],[3200,0,'boost']])if(elapsed>=after&&!fired.has(kind)){
     assert.ok((await emit(sockets[index],'sabotage',{kind,raceId:state.raceId,requestId:'smoke-'+kind})).ok);fired.add(kind);
    }
    for(let i=0;i<2;i++){const p=latest[i]?.players.find(p=>p.id===ids[i]);if(p&&p.finishMs===null)sockets[i].emit('input',{...drive(p,drivers[i]),seq:++seq[i],raceId:state.raceId});}
@@ -37,7 +37,7 @@ try{
  assert.deepEqual(latest[0].players,latest[1].players);assert.deepEqual(latest[0].order,latest[1].order);assert.ok(latest[0].players.every(p=>p.finishMs!==null&&p.lap===2&&!p.dnf));assert.ok(samples>10);
  const results=latest[0].order.map(id=>{const p=latest[0].players.find(p=>p.id===id);return{name:p.name,place:p.finishPlace,timeMs:p.finishMs};});
  assert.ok((await emit(sockets[0],'lobby',{})).ok);assert.ok((await emit(sockets[0],'start',{})).ok);await wait(150);
- assert.ok(latest.every(s=>s.phase==='countdown'&&s.players.every(p=>p.charges===2)));
+ assert.ok(latest.every(s=>s.phase==='countdown'&&s.players.every(p=>p.charges===3)));
  console.log(JSON.stringify({status:'PASS',origin:base.origin,transport:'websocket',clients:2,abilities:[...fired],matchingStateSamples:samples,results,rematch:'PASS'},null,2));
 }catch(error){console.error('Release smoke FAILED:',error.message);process.exitCode=1;}
 finally{for(const s of sockets){s.emit('leave');s.disconnect();}}

@@ -1,37 +1,39 @@
-# Sabotage Sprint
+# Sabotage Sprint — Switchyard XL v1.0
 
 Play: https://sabotage-sprint.onrender.com/
 
-A browser arcade racer with two modes: Race the Computer for one human versus a clearly labeled Rival CPU, and multiplayer rooms for 2–8 real players. Two clockwise laps, server-authoritative checkpoints/results, and exactly three visible, avoidable sabotage abilities: Gate Slam, Belt Flip and Oil Slick. No player account or download required. Both modes require Internet.
+An anonymous multiplayer browser combat racer for 2–8 people, plus one-player practice against a clearly labeled Rival CPU. No player account or installation. Internet access required.
 
-## Play alone or with friends
+## New game experience
 
-Enter a nickname. Select **Race the Computer** to start solo immediately; no room code or second human is needed. Select **Create a room** to invite friends by code/link. Multiplayer starts with two connected humans and never adds bots. Solo rooms accept only their original human's reserved reconnect credential.
+Switchyard XL is an 8,220-unit lap with 12 turns, compared with the previous compact roughly 2,600-unit loop. Lanes are 150 units wide. A smooth following camera fills the playfield; the minimap shows the complete circuit and every racer. Two laps, 12 ordered checkpoints per lap, and a real finish line are validated by the server. No cutting across the infield. The fixed barriers from the old course are removed.
 
-Hold WASD/arrows to steer and accelerate; release to coast; Shift brakes. Touch uses the directions and Brake. Keys 1/2/3 or ability buttons activate sabotage. Cross checkpoints 1–4 in order and then the finish, twice. Hazards affect the caster too. The host can rematch or return to the lobby after results; Leave room returns to the welcome page.
+Hold WASD/arrows to drive and steer. Direction changes turn quickly with automatic corner speed reduction. Release to coast; Shift brakes. Touch players use the directional pad and Brake. Space uses the selected ability; Q/E changes it. Keys 1/2/3 or ability buttons select and fire directly. The large Space / Tap button also fires the selected ability.
 
-## Run and test
+- **Shoot / Pulse Shot:** a visible projectile travels straight ahead. A hit slows one rival briefly; shots can miss and stop at walls.
+- **Bomb / Drop Bomb:** a bomb drops behind the car, with a visible 1.4-second fuse and warning ring before a brief explosion.
+- **Nitro:** a visible blue trail accompanies a 30% speed boost lasting 1.8 seconds.
 
-Node.js 22 or newer:
+Start with 3 charges, hold up to 5, collect shared single-use lightning pickups. All abilities share a 3-second cooldown. Weapons cannot hit their owner. Hits slow for 1.1 seconds and grant 2.4 seconds of immunity, preventing repeated hits from permanently stopping a racer. No vehicle destruction or elimination. Four-minute race limit; unfinished racers have up to 150 seconds after the first finish. Rematch and return to lobby work in both modes.
 
-```sh
+## Architecture
+
+One Node 22 process serves the Canvas frontend and Socket.IO backend, with no database, API secrets or AI API. Server simulation runs at 20Hz; clients send bounded input, predict their own movement and smooth remote cars. Only the server awards progress, finishes, pickups and weapon hits. Room codes and shareable URLs, maximum eight seats, 15-second reconnect reservations, host migration, stale-input protection and idle cleanup are retained. Multiplayer contains real connected humans only. The CPU exists only in private solo mode and uses normal movement/ability requests.
+
+## Run and verify
+
+```
 npm ci
 npm start
 npm test
 ```
 
-26 tests cover complete solo and eight-client multiplayer races, CPU identification/privacy, normal movement/checkpoints/finishes, invalid requests, capacity, reconnection, pickups, sabotage and rematch. computer.js is a server-only practice opponent using ordinary inputs and trusted action validation. Test-only human input drivers remain separate under test/ and are never presented as real players. Physical phones, other browser engines and eight humans still need acceptance testing.
-
-The optional `npm run smoke -- https://YOUR-VERIFIED-GAME-URL` checks two real network clients on your own deployment. It requires an executor that can resolve and connect to the service's WebSocket endpoint; the ChatGPT browser successfully verified public multiplayer, but this executor's public socket test encountered a DNS limitation.
+The tests cover the long track, all twelve checkpoints, responsive steering, finish ordering and ties, weapon hits/misses/warnings/expiry/immunity, shared pickups, malformed requests, disconnects/reconnects/host migration, solo/rematches, and full eight-independent-client races. These are automated network clients, not eight human Internet players. Physical-phone and browser-family tests must be reported separately.
 
 ## Hosting
 
-One long-running Node web service serves both the page and Socket.IO. Build npm ci, start npm start, Node 22, NODE_ENV=production, provider PORT. No API secrets, database or extra AI service is required for either mode. Keep one instance: rooms are in memory and reset on restart/deploy. /health returns readiness. render.yaml is an optional blueprint; direct service settings are authoritative for the current deployment. Automatic deploys are off; publish code changes with a deliberate deploy.
+One existing Render Free Node web service serves both the frontend and multiplayer backend. `npm ci`, then `npm start`, with `NODE_ENV=production` and Node 22. Render supplies `PORT`; the server binds `0.0.0.0`. No new dependency, secret, database or paid plan is needed. Public source updates use a deliberate deploy (auto-deploy is off). Rooms are in memory and disappear on restart/deploy. Free hosting may sleep when idle and take time to wake.
 
-The welcome screen has cream/burgundy/coral racing-poster art and decorative exhibition cars with reduced-motion support. The race remains a dark Canvas overview. Submission cover art and judge instructions were delivered separately; they are not runtime downloads.
+Source: https://github.com/sidharthsssu-alt/sabotage-sprint.
 
-## Circuit update 0.9.0
-
-The circuit is now 1200 × 800, with 225-pixel straights and 295-pixel side lanes. A full-width track replaces the cramped sidebar layout. Numbered racers match the compact classification strip; your car keeps its white ring.
-
-Keyboard: hold WASD or arrows to drive, Shift to brake. Q/E selects a skill and Space uses it once per press. 1/2/3 still selects and fires directly. Click/tap a skill to fire it. Shared server validation, warning times, charges and cooldowns are unchanged. Touch keeps the steering pad and Brake button.
+The submission cover and submission notes are delivered separately. No contest submission is made automatically.
