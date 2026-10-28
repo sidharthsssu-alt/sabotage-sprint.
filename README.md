@@ -1,33 +1,31 @@
 # Sabotage Sprint
 
-A real multiplayer browser racing game for 2–8 players. Two clockwise laps, server-authoritative checkpoints and results, and exactly three visible, avoidable sabotage abilities: Gate Slam, Belt Flip and Oil Slick. No player accounts, bots or downloads.
+Play: https://sabotage-sprint.onrender.com/
 
-## Run
+A browser arcade racer with two modes: Race the Computer for one human versus a clearly labeled Rival CPU, and multiplayer rooms for 2–8 real players. Two clockwise laps, server-authoritative checkpoints/results, and exactly three visible, avoidable sabotage abilities: Gate Slam, Belt Flip and Oil Slick. No player account or download required. Both modes require Internet.
+
+## Play alone or with friends
+
+Enter a nickname. Select **Race the Computer** to start solo immediately; no room code or second human is needed. Select **Create a room** to invite friends by code/link. Multiplayer starts with two connected humans and never adds bots. Solo rooms accept only their original human's reserved reconnect credential.
+
+Hold WASD/arrows to steer and accelerate; release to coast; Space brakes. Touch uses the directions and Brake. Keys 1/2/3 or ability buttons activate sabotage. Cross checkpoints 1–4 in order and then the finish, twice. Hazards affect the caster too. The host can rematch or return to the lobby after results; Leave room returns to the welcome page.
+
+## Run and test
 
 Node.js 22 or newer:
 
 ```sh
 npm ci
 npm start
-```
-
-Open http://localhost:3000 in separate browser sessions. Create a room, share its code/invite, and start with at least two connected players.
-
-## Controls
-
-Hold WASD or arrows to steer/accelerate; release to coast; Space brakes. Touch uses the on-screen direction pad and Brake. Keys 1/2/3 or the ability buttons activate sabotage. All hazards affect the caster too. Cross checkpoints 1–4 in order and then the finish, twice.
-
-## Tests
-
-```sh
 npm test
-npm run smoke -- https://YOUR-VERIFIED-GAME-URL
 ```
 
-22 automated checks cover complete eight-client network races, invalid requests, capacity, reconnection, pickups, hazards and stable finishes. Test-only input drivers are never loaded as game opponents. Physical phones, other browser engines and eight humans still need acceptance testing.
+26 tests cover complete solo and eight-client multiplayer races, CPU identification/privacy, normal movement/checkpoints/finishes, invalid requests, capacity, reconnection, pickups, sabotage and rematch. computer.js is a server-only practice opponent using ordinary inputs and trusted action validation. Test-only human input drivers remain separate under test/ and are never presented as real players. Physical phones, other browser engines and eight humans still need acceptance testing.
+
+The optional `npm run smoke -- https://YOUR-VERIFIED-GAME-URL` checks two real network clients on your own deployment. It requires an executor that can resolve and connect to the service's WebSocket endpoint; the ChatGPT browser successfully verified public multiplayer, but this executor's public socket test encountered a DNS limitation.
 
 ## Hosting
 
-One long-running Node web service serves both the page and Socket.IO. Build `npm ci`, start `npm start`, Node 22, NODE_ENV=production, provider PORT. No API secrets or database required. Keep one instance: rooms are in memory and reset on restart. `/health` returns readiness. `render.yaml` is an optional blueprint; direct service settings are authoritative for this deployment.
+One long-running Node web service serves both the page and Socket.IO. Build npm ci, start npm start, Node 22, NODE_ENV=production, provider PORT. No API secrets, database or extra AI service is required for either mode. Keep one instance: rooms are in memory and reset on restart/deploy. /health returns readiness. render.yaml is an optional blueprint; direct service settings are authoritative for the current deployment. Automatic deploys are off; publish code changes with a deliberate deploy.
 
-The welcome screen uses cream/burgundy/coral racing-poster art and decorative exhibition cars, with reduced-motion support. The actual race remains a dark, readable Canvas circuit. The generated submission cover and detailed submission kit are in the separately delivered release ZIP; they are not runtime assets.
+The welcome screen has cream/burgundy/coral racing-poster art and decorative exhibition cars with reduced-motion support. The race remains a dark Canvas overview. Submission cover art and judge instructions were delivered separately; they are not runtime downloads.
