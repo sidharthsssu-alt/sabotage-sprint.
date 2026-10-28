@@ -24,7 +24,7 @@ npm test
 npm run smoke -- https://YOUR-VERIFIED-GAME-URL
 ```
 
-21 automated checks cover complete eight-client network races, invalid requests, capacity, reconnection, pickups, hazards and stable finishes. Test-only input drivers are never loaded as game opponents. Physical phones, other browser engines and eight humans still need acceptance testing.
+22 automated checks cover complete eight-client network races, invalid requests, capacity, reconnection, pickups, hazards and stable finishes. Test-only input drivers are never loaded as game opponents. Physical phones, other browser engines and eight humans still need acceptance testing.
 
 ## Hosting
 

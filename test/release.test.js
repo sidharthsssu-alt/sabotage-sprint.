@@ -61,3 +61,10 @@ test('exact simultaneous finishes use stable ID tiebreak and unique immutable pl
  advanceRace(r,.05,1050);assert.equal(r.players.get('a').finishPlace,1);assert.equal(r.players.get('z').finishPlace,2);assert.equal(r.players.get('a').finishMs,r.players.get('z').finishMs);
  const results=JSON.stringify([...r.players.values()]);advanceRace(r,1,2050);assert.equal(JSON.stringify([...r.players.values()]),results);
 });
+test('explicit departures from a full countdown free seats after cancellation so a new rival can join',async t=>{
+ const f=await setup(t,8);await emit(f.sockets[0],'start',{});assert.equal(f.room.phase,'countdown');
+ for(let i=0;i<7;i++){f.sockets[i].emit('leave');await wait(10);}
+ assert.equal(f.room.phase,'lobby');assert.equal(f.room.players.size,1);assert.equal(f.room.host,f.seats[7].id);
+ const newRival=await f.connect();const joined=await emit(newRival,'enter',{code:f.room.code,name:'New rival'});assert.ok(joined.ok);assert.equal(f.room.players.size,2);
+ assert.ok((await emit(f.sockets[7],'start',{})).ok);assert.equal(f.room.phase,'countdown');
+});

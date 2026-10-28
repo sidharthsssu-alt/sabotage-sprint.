@@ -31,7 +31,7 @@ export function createGameServer({clock=Date.now,tickMs=50}={}){
  function remove(s,explicit=false){
   const r=roomFor(s),p=playerFor(s,r);if(!p||p.socketId!==s.id)return;
   p.connected=false;p.input={x:0,y:0,brake:true};p.speed=0;p.disconnectedAt=clock();s.leave(r.code);s.data.code=null;s.data.playerId=null;
-  if(explicit){p.token=null;if(r.phase==='lobby')r.players.delete(p.id);else p.dnf=p.finishMs===null;}
+  if(explicit){p.token=null;if(['lobby','countdown'].includes(r.phase))r.players.delete(p.id);else p.dnf=p.finishMs===null;}
   reconcile(r);if(!r.players.size)rooms.delete(r.code);else broadcast(r);
  }
  io.on('connection',s=>{
