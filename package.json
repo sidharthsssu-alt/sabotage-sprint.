@@ -1,0 +1,22 @@
+{
+  "name": "sabotage-sprint",
+  "version": "0.7.1",
+  "private": true,
+  "type": "module",
+  "description": "Sabotage Sprint release candidate: tested multiplayer racing",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "dev": "node server.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "socket.io": "4.8.1"
+  },
+  "devDependencies": {
+    "socket.io-client": "4.8.1"
+  }
+}

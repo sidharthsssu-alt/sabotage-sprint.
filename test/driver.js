@@ -1,0 +1,3 @@
+// Test-only driver. It uses the same direction/brake inputs available to a human.
+export const route=[[175,185],[820,185],[820,510],[180,510],[180,185],[320,185],[820,185],[820,510],[180,510],[180,185],[320,185]];
+export function drive(p,driver){let target=route[Math.min(driver.index,route.length-1)],dx=target[0]-p.x,dy=target[1]-p.y,distance=Math.hypot(dx,dy);if(distance<11&&driver.index<route.length-1){driver.index++;target=route[driver.index];dx=target[0]-p.x;dy=target[1]-p.y;distance=Math.hypot(dx,dy);}const brake=distance<80&&p.speed>Math.max(35,Math.sqrt(Math.max(0,distance-6)*650));return{x:dx/Math.max(1,distance),y:dy/Math.max(1,distance),brake};}
