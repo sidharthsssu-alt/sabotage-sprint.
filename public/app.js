@@ -37,7 +37,7 @@ socket.on('state',next=>{
  if(!myId||next.code!==seat?.code||!next.players.some(p=>p.id===myId&&p.connected))return;
  offset=next.time-Date.now();polishEvents(state,next);const phaseChanged=lastPhase!==next.phase,raceChanged=lastRace!==next.raceId;state=next;lastPhase=next.phase;lastRace=next.raceId;
  const me=next.players.find(p=>p.id===myId);
- if(raceChanged){particles.length=0;hazardVisuals.clear();camera=null;finishUntil=0;pickupUntil=0;lastCount=null;lastFeedId=null;lastOwnStatus='';$('tacticFeed').textContent='';$('effectNotice').textContent='';keys.clear();touch.clear();lastInput='';rendered.clear();}
+ if(raceChanged){particles.length=0;hazardVisuals.clear();camera=null;finishUntil=0;pickupUntil=0;lastCount=null;lastFeedId=null;lastOwnStatus='';$('tacticFeed').textContent='';$('effectNotice').textContent='';keys.clear();touch.clear();document.querySelectorAll('[data-key]').forEach(b=>b.classList.remove('pressed'));lastInput='';rendered.clear();}
  if(me){if(!predicted||raceChanged||next.phase!=='racing'||me.finishMs!==null||me.dnf||Math.hypot(predicted.x-me.x,predicted.y-me.y)>65)predicted={...me};else{predicted.x+=(me.x-predicted.x)*.3;predicted.y+=(me.y-predicted.y)*.3;predicted.angle+=angleDelta(predicted.angle,me.angle)*.25;predicted.speed=me.speed;predicted.slowUntil=me.slowUntil;predicted.boostUntil=me.boostUntil;if(!validPosition(predicted.x,predicted.y))predicted={...me};}}
  render();updateTacticUI();updateTacticAnnouncements();if(phaseChanged)window.scrollTo({top:0,left:0,behavior:'instant'});
 });
@@ -112,7 +112,7 @@ requestAnimationFrame(draw);
 function beep(freq=500){if(!soundEnabled)return;try{audio??=new AudioContext();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=freq;o.connect(g);g.connect(audio.destination);g.gain.setValueAtTime(.04,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);o.start();o.stop(audio.currentTime+.13);}catch{}}
 $('sound').onclick=()=>{soundEnabled=!soundEnabled;$('sound').textContent=soundEnabled?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundEnabled));if(soundEnabled)beep();};
 function useAbility(kind){
- const button=document.querySelector('[data-ability="'+kind+'"]');if(tacticPending||!state||!button||button.disabled||!socket.connected)return;
+ const button=document.querySelector('[data-ability="'+kind+'"]');if(tacticPending||!state||!button||button.dataset.ready!=='true'||!socket.connected)return;
  tacticPending=true;const requestId='a-'+Date.now().toString(36)+'-'+(++actionSerial);
  request('sabotage',{kind,raceId:state.raceId,requestId},r=>{tacticPending=false;if(r.ok&&!r.duplicate){notify(TACTICS.abilities[kind].name+' used!');button.classList.add('success');setTimeout(()=>button.classList.remove('success'),600);beep(320);}});
 }
@@ -123,8 +123,8 @@ function updateTacticAnnouncements(){
 }
 function updateTacticUI(){
  if(!state)return;const clock=now(),me=state.players.find(p=>p.id===myId),eligible=state.phase==='racing'&&socket.connected&&me?.connected&&me.finishMs===null&&!me.dnf,rival=state.players.some(p=>p.id!==myId&&p.connected&&p.finishMs===null&&!p.dnf),cooldown=Math.max(0,(me?.nextSabotageAt??0)-clock);$('charges').textContent=(me?.charges??0)+' / '+TACTICS.maxCharges;$('tacticCooldown').textContent=!eligible?'Get ready':!me?.charges?'Collect a lightning pickup':cooldown?'Ready in '+(cooldown/1000).toFixed(1)+'s':'READY · SPACE TO USE';
- for(const [kind,spec]of Object.entries(TACTICS.abilities)){const b=document.querySelector('[data-ability="'+kind+'"]');b.disabled=!eligible||(!rival&&kind!=='boost')||!me?.charges||cooldown>0||tacticPending;b.dataset.eventId=Object.values(state.hazards??{}).filter(h=>h.kind===kind).at(-1)?.eventId??'';$(kind+'Status').textContent=spec.description;}
- $('fire').disabled=document.querySelector('[data-ability="'+selectedAbility+'"]').disabled;$('fireLabel').textContent=TACTICS.abilities[selectedAbility].name;$('fire').dataset.abilityName=selectedAbility;
+ for(const [kind,spec]of Object.entries(TACTICS.abilities)){const b=document.querySelector('[data-ability="'+kind+'"]');b.disabled=!eligible;b.dataset.ready=String(eligible&&(rival||kind==='boost')&&!!me?.charges&&cooldown===0&&!tacticPending);b.classList.toggle('cooling',b.dataset.ready!=='true');b.dataset.eventId=Object.values(state.hazards??{}).filter(h=>h.kind===kind).at(-1)?.eventId??'';$(kind+'Status').textContent=spec.description;}
+ $('fire').disabled=document.querySelector('[data-ability="'+selectedAbility+'"]').dataset.ready!=='true';$('fireLabel').textContent=TACTICS.abilities[selectedAbility].name;$('fire').dataset.abilityName=selectedAbility;
 }
 $('fire').onclick=()=>{useAbility(selectedAbility);$('fire').blur();};
 function drawTactics(){
