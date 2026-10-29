@@ -2,21 +2,21 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {io as client} from 'socket.io-client';
 import {createGameServer} from '../server.js';
-import {spawn,advanceRace,validPosition,TRACK} from '../game.js';
+import {spawn,advanceRace,validPosition,TRACK,getTrack} from '../game.js';
 import {drive} from './driver.js';
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const emit=(s,event,data)=>new Promise((resolve,reject)=>s.timeout(2000).emit(event,data,(err,value)=>err?reject(err):resolve(value)));
-async function setup(t,n=2){
+async function setup(t,n=2,trackId='switchyard'){
  let now=1000000;const game=createGameServer({clock:()=>now,tickMs:2});
  await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const url='http://127.0.0.1:'+game.server.address().port;
  const sockets=[],seats=[],latest=[];t.after(async()=>{sockets.forEach(s=>s.disconnect());await game.close();});
  async function connect(){const s=client(url,{forceNew:true,reconnection:false,transports:['websocket']});sockets.push(s);await new Promise(r=>s.once('connect',r));return s;}
- for(let i=0;i<n;i++){const s=await connect();s.on('state',v=>latest[i]=v);const seat=await emit(s,'enter',{name:'QA '+i,...(i?{code:seats[0].code}:{create:true})});assert.ok(seat.ok);seats.push(seat);}
+ for(let i=0;i<n;i++){const s=await connect();s.on('state',v=>latest[i]=v);const seat=await emit(s,'enter',{name:'QA '+i,...(i?{code:seats[0].code}:{create:true,trackId})});assert.ok(seat.ok);seats.push(seat);}
  const room=game.rooms.get(seats[0].code);
  return{game,url,sockets,seats,latest,room,connect,advance:v=>now+=v,setClock:v=>now=v};
 }
-test('eight independent WebSocket clients finish a legal race with all abilities and identical replicated results',async t=>{
- const f=await setup(t,8);const history=f.sockets.map(()=>new Map());
+for(const trackId of ['switchyard','marina'])test('eight independent clients finish '+trackId+' with all abilities and identical results',async t=>{
+ const f=await setup(t,8,trackId);const history=f.sockets.map(()=>new Map());
  f.sockets.forEach((s,i)=>s.on('state',v=>{history[i].set(v.revision,JSON.stringify(v));if(history[i].size>20)history[i].delete(history[i].keys().next().value);}));
  await emit(f.sockets[0],'start',{});f.setClock(f.room.raceAt);await wait(20);
  const drivers=f.seats.map(()=>({index:0})),seq=f.seats.map(()=>0),abilities=new Set();let compared=0;
@@ -26,7 +26,7 @@ test('eight independent WebSocket clients finish a legal race with all abilities
   for(let i=0;i<8;i++){const p=f.latest[i]?.players.find(p=>p.id===f.seats[i].id);if(p&&p.finishMs===null)f.sockets[i].emit('input',{...drive(p,drivers[i]),seq:++seq[i],raceId:f.room.raceId});}
   await wait(5);
   if(step%25===0){const common=[...history[0].keys()].filter(r=>history.every(h=>h.has(r))).pop();if(common!==undefined){assert.ok(history.every(h=>h.get(common)===history[0].get(common)));compared++;}}
-  for(const p of f.room.players.values())assert.ok(validPosition(p.x,p.y));
+  for(const p of f.room.players.values())assert.ok(validPosition(p.x,p.y,12,getTrack(p.trackId)));
  }
  await wait(25);assert.equal(f.room.phase,'results');assert.equal(abilities.size,3);assert.ok(compared>10);
  const result=f.latest[0];assert.equal(result.players.length,8);assert.ok(result.players.every(p=>p.finishMs!==null&&p.lap===2&&!p.dnf));
