@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {Server} from 'socket.io';
 import {computerInput,computerAbility} from './computer.js';
-import {TRACK,TRACKS,LAP_OPTIONS,raceDuration,LIMITS,spawn,advanceRace,orderPlayers,resetTactics,activateTactic,hazardStatus} from './game.js';
+import {TRACK,TRACKS,LAP_OPTIONS,raceDuration,LIMITS,spawn,advanceRace,orderPlayers,resetTactics,activateTactic,hazardStatus,shotAim} from './game.js';
 const root=fileURLToPath(new URL('./public/',import.meta.url));
 const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']]]);
 export function createGameServer({clock=Date.now,tickMs=50}={}){
@@ -20,7 +20,7 @@ export function createGameServer({clock=Date.now,tickMs=50}={}){
  });
  const io=new Server(server,{maxHttpBufferSize:2048,serveClient:true,pingTimeout:10000});
  const colors=['#f5684c','#708cff','#d99b20','#a36bce','#29967e','#d75281','#4587bd','#ba7150'];
- function snapshot(r){return{code:r.code,totalLaps:r.totalLaps??2,trackId:r.trackId??'switchyard',mode:r.mode??'multiplayer',host:r.host,phase:r.phase,raceAt:r.raceAt,raceId:r.raceId,endAt:r.endAt,finishedAt:r.finishedAt,hazards:r.hazards,pickups:r.pickups,tacticEvents:r.tacticEvents,order:orderPlayers(r.players.values()),revision:r.revision,message:r.message,players:[...r.players.values()].map(p=>({id:p.id,totalLaps:p.totalLaps,trackId:p.trackId,name:p.name,isBot:!!p.isBot,color:p.color,connected:p.connected,x:p.x,y:p.y,angle:p.angle,speed:p.speed,lap:p.lap,checkpoint:p.checkpoint,finishMs:p.finishMs,finishPlace:p.finishPlace,dnf:p.dnf,lastSeq:p.lastSeq,charges:p.charges,nextSabotageAt:p.nextSabotageAt,slowUntil:p.slowUntil,slowFactor:p.slowFactor,slowKind:p.slowKind,boostUntil:p.boostUntil,hazardStatus:hazardStatus(p,r,clock())})),time:clock()};}
+ function snapshot(r){return{code:r.code,totalLaps:r.totalLaps??2,trackId:r.trackId??'switchyard',mode:r.mode??'multiplayer',host:r.host,phase:r.phase,raceAt:r.raceAt,raceId:r.raceId,endAt:r.endAt,finishedAt:r.finishedAt,hazards:r.hazards,pickups:r.pickups,tacticEvents:r.tacticEvents,order:orderPlayers(r.players.values()),revision:r.revision,message:r.message,players:[...r.players.values()].map(p=>({id:p.id,totalLaps:p.totalLaps,trackId:p.trackId,name:p.name,isBot:!!p.isBot,color:p.color,connected:p.connected,x:p.x,y:p.y,angle:p.angle,speed:p.speed,lap:p.lap,checkpoint:p.checkpoint,finishMs:p.finishMs,finishPlace:p.finishPlace,dnf:p.dnf,lastSeq:p.lastSeq,charges:p.charges,abilityCharges:{...p.abilityCharges},aimTargetId:r.phase==='racing'&&p.connected&&!p.dnf&&p.finishMs===null?shotAim(r,p).targetId:null,nextSabotageAt:p.nextSabotageAt,slowUntil:p.slowUntil,slowFactor:p.slowFactor,slowKind:p.slowKind,boostUntil:p.boostUntil,hazardStatus:hazardStatus(p,r,clock())})),time:clock()};}
  const broadcast=r=>{r.revision++;io.to(r.code).emit('state',snapshot(r));};
  const roomFor=s=>rooms.get(s.data.code);
  const playerFor=(s,r)=>r?.players.get(s.data.playerId);

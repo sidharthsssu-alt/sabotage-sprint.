@@ -11,15 +11,16 @@ async function setup(t){let now=1000000;const game=createGameServer({clock:()=>n
  return{clients,latest,room,a:room.players.get(sa.id),b:room.players.get(sb.id),setClock:v=>now=v,advance:v=>now+=v,clock:()=>now};}
 test('weapons and Nitro replicate identical events, charge consumption and hits across independent clients',async t=>{
  const f=await setup(t),[a,b]=f.clients;
- for(const kind of ['shot','bomb','boost']){
-  f.a.charges=3;f.a.nextSabotageAt=0;Object.assign(f.a,{x:600,y:180,angle:0,speed:0});Object.assign(f.b,{x:790,y:180,speed:0,slowUntil:0,immuneUntil:0});
-  const data={kind,raceId:f.room.raceId,requestId:'net-'+kind},accepted=await emit(a,'sabotage',data);assert.ok(accepted.ok);assert.equal(f.a.charges,2);assert.ok((await emit(a,'sabotage',data)).duplicate);assert.equal(f.a.charges,2);await wait(20);
-  assert.deepEqual(f.latest[0].hazards,f.latest[1].hazards);const h=f.room.hazards[accepted.eventId];assert.equal(h.activeAt-h.warningAt,TACTICS.abilities[kind].warning);assert.equal(h.endsAt-h.activeAt,TACTICS.abilities[kind].duration);assert.ok(f.latest[0].players.every(p=>!('actions'in p)&&!('token'in p)));
-  if(kind==='bomb')Object.assign(f.b,{x:h.x,y:h.y});
+ for(const kind of ['shot','bomb','boost','wall']){
+  f.a.charges=12;f.a.abilityCharges={shot:3,bomb:3,boost:3,wall:3};f.a.nextSabotageAt=0;Object.assign(f.a,{x:600,y:180,angle:0,speed:0});Object.assign(f.b,{x:790,y:180,speed:0,slowUntil:0,immuneUntil:0});
+  const data={kind,raceId:f.room.raceId,requestId:'net-'+kind},accepted=await emit(a,'sabotage',data);assert.ok(accepted.ok);assert.equal(f.a.charges,11);assert.ok((await emit(a,'sabotage',data)).duplicate);assert.equal(f.a.charges,11);await wait(20);
+  assert.deepEqual(f.latest[0].hazards,f.latest[1].hazards);if(kind==='shot')assert.equal(f.latest[0].players.find(p=>p.id===f.a.id).aimTargetId,f.b.id);const h=f.room.hazards[accepted.eventId];assert.equal(h.activeAt-h.warningAt,TACTICS.abilities[kind].warning);assert.equal(h.endsAt-h.activeAt,TACTICS.abilities[kind].duration);assert.ok(f.latest[0].players.every(p=>!('actions'in p)&&!('token'in p)));
+  assert.equal(f.a.abilityCharges[kind],2);assert.deepEqual(f.latest[0].players.find(p=>p.id===f.a.id).abilityCharges,f.latest[1].players.find(p=>p.id===f.a.id).abilityCharges);
+  if(kind==='bomb'||kind==='wall')Object.assign(f.b,{x:h.x,y:h.y});
   for(let i=0;i<100;i++){f.advance(20);await wait(3);}
   if(kind!=='boost')assert.ok(f.b.slowUntil>0);else assert.ok(f.a.boostUntil>0);
   await wait(20);assert.deepEqual(f.latest[0].players,f.latest[1].players);assert.deepEqual(f.latest[0].hazards,f.latest[1].hazards);f.advance(5000);await wait(20);assert.equal(Object.keys(f.room.hazards).length,0);
  }
  f.a.finishMs=123;const before=f.a.charges;assert.match((await emit(a,'sabotage',{kind:'shot',raceId:f.room.raceId,requestId:'finished'})).error,/active racers/);assert.equal(f.a.charges,before);
- const l=TACTICS.pickups[0];Object.assign(f.b,{x:l.x,y:l.y,charges:1});f.advance(50);await wait(20);assert.equal(f.room.pickups[0].claimedBy,f.b.id);b.emit('pickup',{id:l.id});f.advance(50);await wait(20);assert.equal(f.b.charges,2);assert.deepEqual(f.latest[0].pickups,f.latest[1].pickups);
+ const l=TACTICS.pickups[0];Object.assign(f.b,{x:l.x,y:l.y,charges:10,abilityCharges:{shot:1,bomb:3,boost:3,wall:3}});f.advance(50);await wait(20);assert.equal(f.room.pickups[0].claimedBy,f.b.id);b.emit('pickup',{id:l.id});f.advance(50);await wait(20);assert.equal(f.b.charges,11);assert.deepEqual(f.latest[0].pickups,f.latest[1].pickups);
 });

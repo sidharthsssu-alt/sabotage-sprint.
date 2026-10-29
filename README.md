@@ -16,7 +16,7 @@ Hold WASD/arrows to drive and steer. Direction changes turn quickly with automat
 - **Bomb / Drop Bomb:** a bomb drops behind the car, with a visible 1.4-second fuse and a larger 125-unit blast. The explosion slows rivals by 45% for 1.8 seconds without disabling controls. A shockwave and distinct bomb-hit banner make the result clear.
 - **Nitro:** a visible blue trail accompanies a 30% speed boost lasting 1.8 seconds.
 
-Start with 3 charges, hold up to 5, collect shared single-use lightning pickups. All abilities share a 3-second cooldown. Weapons cannot hit their owner. Shots slow by 20% for 0.7 seconds. Bombs slow by 45% for 1.8 seconds. Recovery protection prevents repeat hits for at least 2.4 seconds, preventing repeated hits from permanently stopping a racer. No vehicle destruction or elimination. Race limits scale with the chosen lap count: 4, 10 or 14 minutes. After a first finisher, remaining racers have up to 150, 225 or 315 seconds respectively, bounded by the overall limit. Rematch and return to lobby work in both modes.
+Each of the four abilities starts with 3 separate charges, capped at 5 per skill. Every skill card shows its remaining charges. Shared single-use lightning pickups refill one charge of your lowest-stocked skill (ties use Shoot, Bomb, Nitro, Wall order). All abilities share a 3-second cooldown. Weapons cannot hit their owner. Shots slow by 20% for 0.7 seconds. Bombs slow by 45% for 1.8 seconds. Recovery protection prevents repeat hits for at least 2.4 seconds, preventing repeated hits from permanently stopping a racer. No vehicle destruction or elimination. Race limits scale with the chosen lap count: 4, 10 or 14 minutes. After a first finisher, remaining racers have up to 150, 225 or 315 seconds respectively, bounded by the overall limit. Rematch and return to lobby work in both modes.
 
 ## Architecture
 
@@ -43,3 +43,9 @@ One existing Render Free Node web service serves both the frontend and multiplay
 Source: https://github.com/sidharthsssu-alt/sabotage-sprint.
 
 The submission cover and submission notes are delivered separately. No contest submission is made automatically.
+
+## v1.3 combat clarity
+
+Shoot uses a plus-shaped crosshair: a gold reticle and LOCKED label mark the server-selected rival; cyan means no lock. Aim assist rules and projectile collisions remain authoritative.
+
+Breakaway Wall (4, or select with Q/E and press Space) drops a striped barrier 66 units behind the car, centered on the road. It warns for 0.8 seconds, lasts 4 seconds, and breaks on the first rival contact, slowing that rival 50% for 1.1 seconds. It does not stop steering, harm its owner, or form a permanent blockade. Recovery-protected rivals break through without another slowdown. Unsafe corner placements and overlapping walls are rejected without consuming a charge.

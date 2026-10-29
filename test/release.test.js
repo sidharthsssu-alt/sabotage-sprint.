@@ -22,30 +22,31 @@ for(const trackId of ['switchyard','marina'])test('eight independent clients fin
  const drivers=f.seats.map(()=>({index:0})),seq=f.seats.map(()=>0),abilities=new Set();let compared=0;
  for(let step=0;step<11000&&f.room.phase==='racing';step++){
   f.advance(20);
-  for(const [at,index,kind] of [[0,0,'shot'],[1,1,'bomb'],[155,2,'boost']])if(step===at){assert.ok((await emit(f.sockets[index],'sabotage',{kind,raceId:f.room.raceId,requestId:'qa-'+kind})).ok);abilities.add(kind);}
+  for(const [at,index,kind] of [[0,0,'shot'],[1,1,'bomb'],[155,2,'boost'],[155,3,'wall']])if(step===at){assert.ok((await emit(f.sockets[index],'sabotage',{kind,raceId:f.room.raceId,requestId:'qa-'+kind})).ok);abilities.add(kind);}
   for(let i=0;i<8;i++){const p=f.latest[i]?.players.find(p=>p.id===f.seats[i].id);if(p&&p.finishMs===null)f.sockets[i].emit('input',{...drive(p,drivers[i]),seq:++seq[i],raceId:f.room.raceId});}
   await wait(5);
   if(step%25===0){const common=[...history[0].keys()].filter(r=>history.every(h=>h.has(r))).pop();if(common!==undefined){assert.ok(history.every(h=>h.get(common)===history[0].get(common)));compared++;}}
   for(const p of f.room.players.values())assert.ok(validPosition(p.x,p.y,12,getTrack(p.trackId)));
  }
- await wait(25);assert.equal(f.room.phase,'results');assert.equal(abilities.size,3);assert.ok(compared>10);
+ await wait(25);assert.equal(f.room.phase,'results');assert.equal(abilities.size,4);assert.ok(compared>10);
  const result=f.latest[0];assert.equal(result.players.length,8);assert.ok(result.players.every(p=>p.finishMs!==null&&p.lap===2&&!p.dnf));
  assert.deepEqual([...result.players.map(p=>p.finishPlace)].sort((a,b)=>a-b),[1,2,3,4,5,6,7,8]);
  for(const s of f.latest){assert.deepEqual(s.players,result.players);assert.deepEqual(s.order,result.order);assert.deepEqual(s.pickups,result.pickups);assert.deepEqual(s.hazards,result.hazards);}
- assert.ok(result.pickups.some(p=>p.claimedBy!==null));assert.ok(result.players.every(p=>p.charges>=0&&p.charges<=5));
+ assert.ok(result.pickups.some(p=>p.claimedBy!==null));assert.ok(result.players.every(p=>p.charges>=0&&p.charges<=20));
  console.log('Eight-client places/times:',JSON.stringify(result.order.map(id=>{const p=result.players.find(p=>p.id===id);return[p.name,p.finishPlace,p.finishMs];})), 'matching snapshot checks:',compared);
  assert.ok((await emit(f.sockets[0],'lobby',{})).ok);assert.ok((await emit(f.sockets[0],'start',{})).ok);await wait(20);
- assert.ok(f.latest.every(s=>s.phase==='countdown'&&s.players.every(p=>p.charges===3)&&s.pickups.every(p=>p.claimedBy===null)));
+ assert.ok(f.latest.every(s=>s.phase==='countdown'&&s.players.every(p=>p.charges===12)&&s.pickups.every(p=>p.claimedBy===null)));
 });
 test('malformed ability payloads and forged movement/scoring do not crash authority or change state',async t=>{
- const f=await setup(t);await emit(f.sockets[0],'start',{});f.setClock(f.room.raceAt);await wait(20);const p=f.room.players.get(f.seats[0].id),before=[p.x,p.y,p.lap,p.charges];
+ const f=await setup(t);await emit(f.sockets[0],'start',{});f.setClock(f.room.raceAt);await wait(20);const p=f.room.players.get(f.seats[0].id),before=[p.x,p.y,p.lap,p.charges],inventory={...p.abilityCharges};
  for(const data of [null,[],{kind:{toString:null}},{kind:['boost']},{kind:'__proto__'},{kind:'boost',requestId:{}},{kind:'boost',requestId:'x',raceId:-1}]){
   const payload=data&&typeof data==='object'?{raceId:f.room.raceId,requestId:'bad',...data}:data;
   assert.ok((await emit(f.sockets[0],'sabotage',payload)).error);
  }
  for(const data of [null,{}, {x:null,y:0,brake:false,seq:1}, {x:1,y:0,brake:'no',seq:2}, {x:1,y:0,brake:false,seq:-1}])f.sockets[0].emit('input',{...data,raceId:f.room.raceId});
+ f.sockets[0].emit('input',{x:0,y:0,brake:true,seq:10,raceId:f.room.raceId,charges:999,abilityCharges:{shot:999,bomb:999,boost:999,wall:999},aimTargetId:'forged'});
  f.sockets[0].emit('finish',{time:0,place:1});f.sockets[0].emit('pickup',{id:'east'});f.sockets[0].emit('position',{x:9999,y:9999,lap:2});
- f.advance(50);await wait(30);assert.deepEqual([p.x,p.y,p.lap,p.charges],before);assert.equal(p.finishMs,null);assert.equal((await fetch(f.url+'/health')).status,200);
+ f.advance(50);await wait(30);assert.deepEqual([p.x,p.y,p.lap,p.charges],before);assert.deepEqual(p.abilityCharges,inventory);assert.equal(p.finishMs,null);assert.equal((await fetch(f.url+'/health')).status,200);
 });
 test('mid-race host departure, reserved reconnect and grace expiry preserve ongoing race and scoring',async t=>{
  const f=await setup(t,3);await emit(f.sockets[0],'start',{});f.setClock(f.room.raceAt);await wait(20);
