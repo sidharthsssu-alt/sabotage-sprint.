@@ -49,3 +49,7 @@ The submission cover and submission notes are delivered separately. No contest s
 Shoot uses a plus-shaped crosshair: a gold reticle and LOCKED label mark the server-selected rival; cyan means no lock. Aim assist rules and projectile collisions remain authoritative.
 
 Breakaway Wall (4, or select with Q/E and press Space) drops a striped barrier 66 units behind the car, centered on the road. It warns for 0.8 seconds, lasts 4 seconds, and breaks on the first rival contact, slowing that rival 50% for 1.1 seconds. It does not stop steering, harm its owner, or form a permanent blockade. Recovery-protected rivals break through without another slowdown. Unsafe corner placements and overlapping walls are rejected without consuming a charge.
+
+## v1.4 visual identity
+
+The welcome page uses real track photography by Wes Tindel (Unsplash License), locally hosted with attribution, and locally hosted Barlow Condensed racing typography (SIL OFL 1.1). Asset provenance and font license are in public/assets/CREDITS.txt and OFL-Barlow.txt. Asphalt black, warm ivory and racing red replace the former welcome palette; the same interface colors carry into the lobby/HUD. Track geometry, controls, physics, inventory, sabotage and networking are unchanged. The photo is promotional welcome artwork; gameplay remains top-down Canvas racing.

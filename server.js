@@ -6,7 +6,7 @@ import {Server} from 'socket.io';
 import {computerInput,computerAbility} from './computer.js';
 import {TRACK,TRACKS,LAP_OPTIONS,raceDuration,LIMITS,spawn,advanceRace,orderPlayers,resetTactics,activateTactic,hazardStatus,shotAim} from './game.js';
 const root=fileURLToPath(new URL('./public/',import.meta.url));
-const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']]]);
+const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']],['/assets/race-photo-wes-tindel.jpg',['assets/race-photo-wes-tindel.jpg','image/jpeg']],['/assets/BarlowCondensed-ExtraBoldItalic.ttf',['assets/BarlowCondensed-ExtraBoldItalic.ttf','font/ttf']],['/assets/OFL-Barlow.txt',['assets/OFL-Barlow.txt','text/plain']],['/assets/CREDITS.txt',['assets/CREDITS.txt','text/plain']]]);
 export function createGameServer({clock=Date.now,tickMs=50}={}){
  const rooms=new Map();
  const server=http.createServer(async(req,res)=>{
@@ -16,7 +16,7 @@ export function createGameServer({clock=Date.now,tickMs=50}={}){
   if(path==='/health'){res.writeHead(200,{'Content-Type':'application/json'});return res.end('{"ok":true}');}
   if(path==='/physics.js'){res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'});return res.end(await readFile(new URL('./game.js',import.meta.url)));}
   const entry=files.get(path);if(!entry){res.writeHead(404);return res.end('Not found');}
-  try{const bytes=await readFile(root+entry[0]);res.writeHead(200,{'Content-Type':entry[1]+'; charset=utf-8','Cache-Control':'no-store'});res.end(bytes);}catch{res.writeHead(500);res.end('Unable to load game');}
+  try{const bytes=await readFile(root+entry[0]);res.writeHead(200,{'Content-Type':entry[1]+(entry[1].startsWith('text/')?'; charset=utf-8':''),'Cache-Control':'no-store'});res.end(bytes);}catch{res.writeHead(500);res.end('Unable to load game');}
  });
  const io=new Server(server,{maxHttpBufferSize:2048,serveClient:true,pingTimeout:10000});
  const colors=['#f5684c','#708cff','#d99b20','#a36bce','#29967e','#d75281','#4587bd','#ba7150'];
