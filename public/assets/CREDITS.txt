@@ -8,7 +8,4 @@ Typography: Barlow Condensed ExtraBold Italic, Copyright 2017 The Barlow Project
 Source: https://github.com/google/fonts/tree/main/ofl/barlowcondensed
 License: SIL Open Font License 1.1 — see OFL-Barlow.txt.
 
-Trackside photo panels additionally use: Aral Tasher — red racing car on track, Orlando (September 8, 2019).
-Source: https://unsplash.com/photos/red-racing-car-on-track-2FWMz7Ug90U
-License: Unsplash License, https://unsplash.com/license
-Locally hosted, cropped to billboard panels. Photos are decorative scenery and do not represent additional live players.
+The Wes Tindel photograph is also used as one oversized background behind the racing viewport, with cropping and a light color wash. There are no trackside photo billboards. The pictured car is decorative background art, not another opponent.
