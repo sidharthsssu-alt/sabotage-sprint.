@@ -6,7 +6,7 @@ import {Server} from 'socket.io';
 import {computerInput,computerAbility} from './computer.js';
 import {TRACK,TRACKS,LAP_OPTIONS,raceDuration,LIMITS,spawn,advanceRace,orderPlayers,resetTactics,activateTactic,hazardStatus,shotAim} from './game.js';
 const root=fileURLToPath(new URL('./public/',import.meta.url));
-const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']],['/assets/race-photo-wes-tindel.jpg',['assets/race-photo-wes-tindel.jpg','image/jpeg']],['/assets/BarlowCondensed-ExtraBoldItalic.ttf',['assets/BarlowCondensed-ExtraBoldItalic.ttf','font/ttf']],['/assets/OFL-Barlow.txt',['assets/OFL-Barlow.txt','text/plain']],['/assets/CREDITS.txt',['assets/CREDITS.txt','text/plain']]]);
+const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']],['/assets/race-photo-aral-tasher.jpg',['assets/race-photo-aral-tasher.jpg','image/jpeg']],['/assets/race-photo-wes-tindel.jpg',['assets/race-photo-wes-tindel.jpg','image/jpeg']],['/assets/BarlowCondensed-ExtraBoldItalic.ttf',['assets/BarlowCondensed-ExtraBoldItalic.ttf','font/ttf']],['/assets/OFL-Barlow.txt',['assets/OFL-Barlow.txt','text/plain']],['/assets/CREDITS.txt',['assets/CREDITS.txt','text/plain']]]);
 export function createGameServer({clock=Date.now,tickMs=50}={}){
  const rooms=new Map();
  const server=http.createServer(async(req,res)=>{

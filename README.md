@@ -53,3 +53,7 @@ Breakaway Wall (4, or select with Q/E and press Space) drops a striped barrier 6
 ## v1.4 visual identity
 
 The welcome page uses real track photography by Wes Tindel (Unsplash License), locally hosted with attribution, and locally hosted Barlow Condensed racing typography (SIL OFL 1.1). Asset provenance and font license are in public/assets/CREDITS.txt and OFL-Barlow.txt. Asphalt black, warm ivory and racing red replace the former welcome palette; the same interface colors carry into the lobby/HUD. Track geometry, controls, physics, inventory, sabotage and networking are unchanged. The photo is promotional welcome artwork; gameplay remains top-down Canvas racing.
+
+## v1.5 daylight circuits
+
+Both circuits now have a daylight palette, with sage grounds on Switchyard and turquoise water on Marina, medium grey asphalt, and a warm-white dashboard. Two cached real racing-photo billboards occupy off-road spaces on each circuit. Photo credits and licensing are in public/assets/CREDITS.txt. Images load asynchronously with a labeled fallback; scenery is baked into the existing track cache instead of drawing extra photo effects every frame. Geometry, boundaries, controls, weapons and authority are unchanged.
